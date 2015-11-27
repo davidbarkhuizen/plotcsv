@@ -4,6 +4,7 @@
 	"EndDate" : "2015-11-26",
 	"Title" : "ZAR Prime Overdraft Rate",
 	"YLabel" : "ZAR Prime Overdraft Rate %",
+	"XLabel" : "Time",
 	"DateColName" : "date",
 	"ValColName" : "rate"
 }

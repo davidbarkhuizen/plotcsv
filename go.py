@@ -80,6 +80,7 @@ def main():
 	start_date = datetime.strptime(config['StartDate'], '%Y-%m-%d') 
 	end_date = datetime.strptime(config['EndDate'], '%Y-%m-%d')
 	y_label = config['YLabel']
+	x_label = config['XLabel']
 
 	date_col_name = config['DateColName']
 	val_col_name = config['ValColName']
@@ -97,14 +98,22 @@ def main():
 
 	import matplotlib.pyplot as plt
 
-	plt.plot(plt_domain, plt_range)
-	plt.title(title)
-	plt.ylabel(y_label)
-	plt.xticks(rotation=90)
+	# ax.set_color_cycle(['red', 'black', 'yellow'])
+	plt.subplot(111, axisbg='black')
 
-	plt.savefig(file_name, bbox_inches='tight')
+	lines_plots = plt.plot(plt_domain, plt_range)
+	line_plot = lines_plots[0]
+	line_plot.set_color('white')
 
-	plt.show()
+	# plt.xlabel('time (s)', color='r')
+	plt.title(title, color='white')
+	plt.ylabel(y_label, color='white')
+	plt.xlabel(x_label, color='white')
 
+	plt.yticks(color='white')
+	plt.xticks(rotation=90, color='white')
+
+	border_color = 'black'
+	plt.savefig(file_name, bbox_inches='tight', facecolor=border_color)
 
 main()
