@@ -2,78 +2,109 @@ import csv
 from datetime import datetime
 import matplotlib
 
-def load_csv_rows(path, start_date, end_date, timestamp_format = '%Y-%m-%d'):
+import codecs
+
+CONFIG_FILE_PATH = 'config.json'
+
+import json
+
+def load_json_config(path):
+
+	j = None
+
+	with open(path) as f:
+		text = f.read()
+		j = json.loads(text)
+
+	return j
+
+def load_csv_rows(source_path, start_date, end_date, date_col_name, val_col_name, timestamp_format = '%Y-%m-%d'):
 
 	rows = []
 
 	col_map = {}
 
-	with open(source_path) as csv_file:
-	    
-	    dialect = csv.Sniffer().sniff(csv_file.read(1024))
-	    csv_file.seek(0)
-	    reader = csv.reader(csv_file, dialect)
+	# codes required under python3 in order to strip BOM
+	#
+	with codecs.open(source_path, 'r', "utf-8-sig") as csv_file:
+		
+		dialect = csv.Sniffer().sniff(csv_file.read(1024))
+		csv_file.seek(0)
+		reader = csv.reader(csv_file, dialect)
 
-	    header_skipped = False
-	    for row in reader:
+		header_skipped = False
+		for row in reader:
 
-	    	if not header_skipped:
-	    		header_skipped = True
-	    		
-	    		col_count = len(row) 
+			if not header_skipped:
+				header_skipped = True
+				
+				col_count = len(row) 
 
-	    		for i in range(col_count):
+				for i in range(col_count):
 
-	    			col_name = row[i].lower().strip()
-	    			col_map[col_name] = i
+					col_name = row[i]
+					col_map[col_name] = i
 
-	    		continue
+				continue
+			
+			try:
+				timestamp = datetime.strptime(row[col_map[date_col_name]], timestamp_format)
+			except KeyError as ke:
+				print(col_map.keys())
 
-	    	timestamp = datetime.strptime(row[col_map['date']], timestamp_format)
+			if start_date:
+				if (timestamp < start_date):
+					continue
+			if end_date:
+				if (timestamp > end_date):
+					break
 
-	    	if start_date:
-	    		if (timestamp < start_date):
-	    			continue
-	    	if end_date:
-	    		if (timestamp > end_date):
-	    			break
+			row_data = []
+			for j in range(col_count):
+				value = row[j]
+				if j == col_map[date_col_name]:
+					value = datetime.strptime(value, timestamp_format)
+				row_data.append(value)
 
-	    	row_data = []
-	    	for j in range(col_count):
-	    		value = row[j]
-	    		if j == col_map['date']:
-	    			value = datetime.strptime(value, timestamp_format)
-    			row_data.append(value)
-
-    		rows.append(row_data)
-	    	
+			rows.append(row_data)
+			
 	return col_map, rows
 
-source_path = '/home/david/data/csv_data/equity_indices/^GSPC.csv'
 
-start_date = datetime.strptime('2014-01-01', '%Y-%m-%d') 
-end_date = None # datetime.strptime('2001-10-01', '%Y-%m-%d')4
+def main():
 
-col_map, rows = load_csv_rows(source_path, start_date, end_date)
+	config = load_json_config(CONFIG_FILE_PATH)
 
-plt_domain = []
-plt_range = []
+	title = config['Title']
+	source_path = config['SourcePath']	
+	start_date = datetime.strptime(config['StartDate'], '%Y-%m-%d') 
+	end_date = datetime.strptime(config['EndDate'], '%Y-%m-%d')
+	y_label = config['YLabel']
 
-for row in rows:
-	plt_domain.append(row[col_map['date']])
-	plt_range.append(row[col_map['close']])
+	date_col_name = config['DateColName']
+	val_col_name = config['ValColName']
 
-import matplotlib.pyplot as plt
+	file_name = title.replace(' ', '') + '.png'
 
-plt.plot(plt_domain, plt_range)
-plt.title('S&P500 Index')
-plt.ylabel('Closing Price')
-plt.show()
+	col_map, rows = load_csv_rows(source_path, start_date, end_date, date_col_name, val_col_name)
+
+	plt_domain = []
+	plt_range = []
+
+	for row in rows:
+		plt_domain.append(row[col_map[date_col_name]])
+		plt_range.append(row[col_map[val_col_name]])
+
+	import matplotlib.pyplot as plt
+
+	plt.plot(plt_domain, plt_range)
+	plt.title(title)
+	plt.ylabel(y_label)
+	plt.xticks(rotation=90)
+
+	plt.savefig(file_name, bbox_inches='tight')
+
+	plt.show()
 
 
-
-# load series - file path
-# filter series - start, end - dates
-# apply functions, producing plots for 1 x axis, 2 y axes (or 1 y axis) - with labels
-# save to file
-
+main()

@@ -1,0 +1,9 @@
+{
+	"SourcePath" : "/home/david/data/csv_data/irate/ZAR/ZAR_PrimeOverdraft.csv",
+	"StartDate" : "2001-1-1", 
+	"EndDate" : "2015-11-26",
+	"Title" : "ZAR Prime Overdraft Rate",
+	"YLabel" : "ZAR Prime Overdraft Rate %",
+	"DateColName" : "date",
+	"ValColName" : "rate"
+}
