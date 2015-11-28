@@ -5,7 +5,7 @@ from datetime import datetime
 
 import json
 
-CONFIG_FILE_PATH = 'config/cushing.json'
+CONFIG_FILE_PATH = 'config/gold.json'
 
 def load_config(path):
 
@@ -59,6 +59,7 @@ def load_csv_rows(source_path, start_date, end_date, date_col_name, val_col_name
 				timestamp = datetime.strptime(row[col_map[date_col_name]], timestamp_format)
 			except KeyError as ke:
 				print(col_map.keys())
+				raise
 
 			if start_date:
 				if (timestamp < start_date):
@@ -84,28 +85,26 @@ def load_csv_rows(source_path, start_date, end_date, date_col_name, val_col_name
 import matplotlib
 import matplotlib.pyplot as plt
 
-def gen_plot_and_save(plt_domain, plt_range, title, domain_label, range_label, file_name):
+def line_plot_to_file(file_name, plt_domain, plt_range, title, domain_label, range_label, fore_color='white', back_color='black'):
 
-	# ax.set_color_cycle(['red', 'black', 'yellow'])
-	plt.subplot(111, axisbg='black')
+	plt.subplot(111, axisbg=back_color)
 
 	lines_plots = plt.plot(plt_domain, plt_range)
 	line_plot = lines_plots[0]
-	line_plot.set_color('white')
+	line_plot.set_color(fore_color)
 
 	# plt.xlabel('time (s)', color='r')
-	plt.title(title, color='white')
-	plt.ylabel(range_label, color='white')
-	plt.xlabel(domain_label, color='white')
+	plt.title(title, color=fore_color)
+	plt.ylabel(range_label, color=fore_color)
+	plt.xlabel(domain_label, color=fore_color)
 
-	plt.yticks(color='white')
-	plt.xticks(rotation=90, color='white')
+	plt.yticks(color=fore_color)
+	plt.xticks(rotation=90, color=fore_color)
 
-	border_color = 'black'
-	plt.savefig(file_name, bbox_inches='tight', facecolor=border_color)
+	plt.savefig(file_name, bbox_inches='tight', facecolor=back_color)
 
 # ---------------------------------------------------------
-# plot
+# run
 
 def main():
 
@@ -115,26 +114,24 @@ def main():
 
 	# data
 
-	source_path = config['SourcePath']
-
 	date_col_name = config['DateColName']
 	val_col_name = config['ValColName']
 
 	# data filter
 
+	# '%Y-%m-%d'
+
 	start_date = datetime.strptime(config['StartDate'], '%Y-%m-%d') 
 	end_date = datetime.strptime(config['EndDate'], '%Y-%m-%d')
+
+	# load & filter data
+
+	# ALSO GET actual start, end dates from load_csv_rows
+	col_map, rows = load_csv_rows(config['SourcePath'], start_date, end_date, date_col_name, val_col_name)
 
 	# plot labels
 
 	title = config['Title']
-
-	range_label = config['YLabel']
-	domain_label = config['XLabel']
-
-	# load & filter data
-
-	col_map, rows = load_csv_rows(source_path, start_date, end_date, date_col_name, val_col_name)
 
 	# define plot data
 
@@ -147,7 +144,7 @@ def main():
 
 	# plot
 
-	file_name = title.replace(' ', '') + '.png'
-	gen_plot_and_save(plt_domain, plt_range, title, domain_label, range_label, file_name)
+	file_name = title.replace(' ', '').replace('\n', '') + '.png'
+	line_plot_to_file(file_name, plt_domain, plt_range, title, config['XLabel'], config['YLabel'])
 
 main()
