@@ -1,11 +1,11 @@
 {
-	"SourcePath" : "/home/david/data/csv_data/commodity/metals/gold_daily.csv",
+	"SourcePath" : "/home/david/data/csv_data/commodity/metals/perth_mint/gold.csv",
 	"StartDate" : "2001-1-1", 
 	"EndDate" : "2015-11-27",
-	"Title" : "Gold",
+	"Title" : "Gold, Perth Mint Spot",
 	"YLabel" : "USD per Ounce",
-	"XLabel" : "Time",
+	"XLabel" : "Date",
 	"DateColName" : "Date",
-	"ValColName" : "Price",
-	"DateFormat" : "%M %d, %Y"
+	"ValColName" : "PerthMintSpot",
+	"DateFormat" : "%d/%m/%Y"
 }

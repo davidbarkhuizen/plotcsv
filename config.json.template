@@ -1,10 +1,10 @@
 {
 	"SourcePath" : "/home/david/data/csv_data/equity_indices/^HSI.csv",
-	"StartDate" : "2009-1-1", 
+	"StartDate" : "1975-1-1", 
 	"EndDate" : "2015-11-27",
 	"Title" : "HangSeng Stock Index Shanghai",
 	"YLabel" : "Closing Price",
 	"XLabel" : "Time",
-	"DateColName" : "Date",
+	"DateColName" : "Market",
 	"ValColName" : "Close"
 }
