@@ -89,6 +89,7 @@ def load_csv_rows(source_path, start_date, end_date, date_col_name, timestamp_fo
 
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 def line_plot_to_file(file_name, plt_domain, plt_ranges, title, domain_label, range_label, fore_color='white', back_color='black'):
 
@@ -112,7 +113,12 @@ def line_plot_to_file(file_name, plt_domain, plt_ranges, title, domain_label, ra
 	plt.xlabel(domain_label, color=fore_color)
 
 	plt.yticks(color=fore_color)
+	
 	plt.xticks(rotation=90, color=fore_color)
+
+	xFormatter = mdates.DateFormatter('%y-%m-%d') # date_out_format
+	ax1.xaxis.set_major_formatter(xFormatter)
+
 
 	# LEGEND
 
