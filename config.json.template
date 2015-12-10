@@ -1,10 +1,16 @@
 {
-	"SourcePath" : "/home/david/data/csv_data/equity_indices/^HSI.csv",
-	"StartDate" : "1975-1-1", 
-	"EndDate" : "2015-11-27",
-	"Title" : "HangSeng Stock Index Shanghai",
-	"YLabel" : "Closing Price",
-	"XLabel" : "Time",
-	"DateColName" : "Market",
-	"ValColName" : "Close"
+	"SourcePath" : "/home/david/data/moore_sensor_data/TestFile.csv",
+	
+	"DateColName" : "TS",
+	"TimeStampFormat" : "%Y/%m/%d %H:%M",
+	"StartDate" : "2011-02-17", 
+	"EndDate" : "2011-03-17",
+
+	"SeriesY1" : ["TAG9", "TAG10"],
+	
+	"Title" : "Moore Matrikon",
+	"YLabel" : "USD per Ounce",
+	"XLabel" : "Date",
+	
+	"OutputPath" : "/home/david/data/moore_sensor_data/" 
 }

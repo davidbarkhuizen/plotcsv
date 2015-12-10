@@ -1,3 +1,4 @@
+
 '''
 load text file of lines
 for each line:

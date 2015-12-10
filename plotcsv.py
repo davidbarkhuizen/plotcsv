@@ -31,6 +31,10 @@ import codecs
 
 def load_csv_rows(source_path, start_date, end_date, date_col_name, timestamp_format):
 
+	# log
+	# - actual data range
+	# - target range
+
 	rows = []
 
 	col_map = {}
@@ -60,6 +64,7 @@ def load_csv_rows(source_path, start_date, end_date, date_col_name, timestamp_fo
 
 				continue
 			
+			timestamp = None
 			try:
 				timestamp = datetime.strptime(row[col_map[date_col_name]], timestamp_format)
 			except KeyError as ke:
@@ -91,7 +96,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 
-def line_plot_to_file(file_name, plt_domain, plt_ranges, title, domain_label, range_label, fore_color='white', back_color='black'):
+def line_plot_to_file(file_name, plt_domain, plt_ranges, title, domain_label, range_label, fore_color='white', back_color='black', major_grid = False):
 
 	fig = plt.figure()
 	ax1 = fig.add_subplot(111, axisbg=back_color)
@@ -120,6 +125,7 @@ def line_plot_to_file(file_name, plt_domain, plt_ranges, title, domain_label, ra
 	ax1.xaxis.set_major_formatter(xFormatter)
 
 
+	# ------------------------------------
 	# LEGEND
 
 	# location
@@ -135,6 +141,15 @@ def line_plot_to_file(file_name, plt_domain, plt_ranges, title, domain_label, ra
 	for text in legend_ax1.get_texts():
 		text.set_color(fore_color)
 
+	# ------------------------------------
+	# GRID LINES
+
+	if major_grid:
+		plt.grid(b=True, which='major', color='grey') # linestyle='-'
+
+	# ------------------------------------
+	# SAVE TO FILE
+
 	fig.savefig(file_name, bbox_inches='tight', facecolor=back_color)
 
 # ---------------------------------------------------------
@@ -149,7 +164,6 @@ def main():
 	# data
 
 	date_col_name = config['DateColName']
-	val_col_name = config['ValColName']
 
 	# data filter
 
@@ -188,7 +202,11 @@ def main():
 
 	# plot
 
-	file_name = title.replace(' ', '').replace('\n', '') + '.png'
-	line_plot_to_file(file_name, plt_domain, plt_ranges, title, config['XLabel'], config['YLabel'])
+	output_path = config['OutputPath']
+
+	out_file_name = title.replace(' ', '').replace('\n', '') + '.png'
+	out_file_path = output_path + out_file_name
+
+	line_plot_to_file(out_file_path, plt_domain, plt_ranges, title, config['XLabel'], config['YLabel'], major_grid = config["MajorGridLines"])
 
 main()

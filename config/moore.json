@@ -1,14 +1,18 @@
 {
 	"SourcePath" : "/home/david/data/moore_sensor_data/TestFile.csv",
+	
+	"DateColName" : "TS",
+	"TimeStampFormat" : "%Y/%m/%d %H:%M",
 	"StartDate" : "2011-02-17", 
-	"EndDate" : "2011-05-07",
+	"EndDate" : "2011-03-17",
+
+	"SeriesY1" : ["TAG9", "TAG10", "TAG3"],
+	
 	"Title" : "Moore Matrikon",
 	"YLabel" : "USD per Ounce",
 	"XLabel" : "Date",
-	"DateColName" : "TS",
-	"ValColName" : "TAG9",
 
-	"SeriesY1" : ["TAG9", "TAG10"],
-
-	"TimeStampFormat" : "%Y/%m/%d %H:%M"
+	"MajorGridLines" : true,
+	
+	"OutputPath" : "/home/david/data/moore_sensor_data/" 
 }
