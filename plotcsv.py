@@ -11,7 +11,7 @@ from datetime import datetime
 
 import json
 
-CONFIG_FILE_PATH = 'config/moore.json'
+CONFIG_FILE_PATH = 'config/s&p500.json'
 
 def load_config(path):
 
@@ -83,6 +83,8 @@ def load_csv_rows(source_path, start_date, end_date, date_col_name, timestamp_fo
 				value = row[j]
 				if j == col_map[date_col_name]:
 					value = datetime.strptime(value, timestamp_format)
+				else:
+					value = float(value)
 				row_data.append(value)
 
 			rows.append(row_data)
@@ -95,57 +97,106 @@ def load_csv_rows(source_path, start_date, end_date, date_col_name, timestamp_fo
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.ticker as mtick
 
-def line_plot_to_file(file_name, plt_domain, plt_ranges, title, domain_label, range_label, fore_color='white', back_color='black', major_grid = False):
+def line_plot_to_file(file_name, 
+	plt_domain, plt_ranges_y1, plt_ranges_y2, 
+	title, domain_label, range_label, range_2_label = 'UnNamed', 
+	fore_color='white', back_color='black', 
+	major_grid = False):
+
+	# matplotlib.rc('axes',edgecolor='red', facecolor='purple')
 
 	fig = plt.figure()
-	ax1 = fig.add_subplot(111, axisbg=back_color)
 
-	'''
-	ax1.scatter(x[:4], y[:4], s=10, c='b', marker="s", label='first')
-	ax1.scatter(x[40:],y[40:], s=10, c='r', marker="o", label='second')
-	plt.legend(loc='upper left');
-	plt.show()
-	'''
 	lines_plots = []
 
-	for (plt_range_name, plt_range) in plt_ranges:
-		line_plot = ax1.plot(plt_domain, plt_range, label=plt_range_name)
+	xFormatter = mdates.DateFormatter('%y-%m-%d') # date_out_format
+
+	# Primary Y Axis ----------------------------------
+
+	ax1 = fig.add_subplot(111, axisbg=back_color)
+
+	for (plt_range_name, plt_range, plt_colour) in plt_ranges_y1:
+		line_plot = ax1.plot(plt_domain, plt_range, label=plt_range_name, color=plt_colour)
 		lines_plots.append(line_plot)
 
-	plt.title(title, color=fore_color)
-	plt.ylabel(range_label, color=fore_color)
-	plt.xlabel(domain_label, color=fore_color)
-
-	plt.yticks(color=fore_color)
-	
-	plt.xticks(rotation=90, color=fore_color)
-
-	xFormatter = mdates.DateFormatter('%y-%m-%d') # date_out_format
-	ax1.xaxis.set_major_formatter(xFormatter)
-
-
-	# ------------------------------------
-	# LEGEND
-
-	# location
+	# legend
 	#
 	legend_ax1 = ax1.legend(loc='lower left') # ax.get_legend()
-	
-	# background color
-	#
 	legend_ax1.get_frame().set_facecolor(back_color)
-
-	# text color
-	#
 	for text in legend_ax1.get_texts():
 		text.set_color(fore_color)
+	legend_ax1.get_frame().set_edgecolor(back_color)
+
+	start_date = min(plt_domain)
+	end_date = max(plt_domain)
+
+	ax1.set_xlabel(domain_label, color=fore_color)  
+	
+	ax1.xaxis.set_major_formatter(xFormatter)
+	plt.xticks(color=fore_color, rotation=90)
+
+	ax1.set_ylabel(range_label, color=fore_color)
+	plt.yticks(color=fore_color)
+
+	ax1.tick_params(axis='x', colors=fore_color)
+	ax1.tick_params(axis='y', colors=fore_color)
+
+	# matplotlib.rc('axes', edgecolor='yellow')
+
+	# Y Axis - 2
+
+	ax2 = None
+
+	if len(plt_ranges_y2) > 0:
+
+		ax2 = ax1.twinx()
+
+		for (plt_range_name, plt_range, plt_colour) in plt_ranges_y2:
+			line_plot = ax2.plot(plt_domain, plt_range, label=plt_range_name, color=plt_colour)
+			lines_plots.append(line_plot)
+
+		'''
+		for y_tick in ax2.get_yticklabels():
+			y_tick.set_color(fore_color)
+		'''
+
+		ax2.ticklabel_format(axis='y', style='sci', color=fore_color)
+
+		ax2.set_ylabel(range_2_label, color=fore_color)  
+
+		# legend
+		#
+		legend_ax2 = ax2.legend(loc='lower right') # ax.get_legend()
+		legend_ax2.get_frame().set_facecolor(back_color)
+		legend_ax2.get_frame().set_edgecolor(back_color)
+
+		for text in legend_ax2.get_texts():
+			text.set_color(fore_color)
+
+		ax2.tick_params(axis='y', colors=fore_color, labelcolor=fore_color)
+		ax2.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.3e'))
+
+	# plot area edge
+	#
+	for child in ax1.get_children():
+		if isinstance(child, matplotlib.spines.Spine):
+			child.set_color(fore_color)
+	if ax2:
+		for child in ax2.get_children():
+			if isinstance(child, matplotlib.spines.Spine):
+				child.set_color(fore_color)
+	
+	# common
+
+	plt.title(title, color=fore_color)
 
 	# ------------------------------------
 	# GRID LINES
 
 	if major_grid:
-		plt.grid(b=True, which='major', color='grey') # linestyle='-'
+		ax1.grid(b=True, which='major', color='grey') # linestyle='-'
 
 	# ------------------------------------
 	# SAVE TO FILE
@@ -184,21 +235,28 @@ def main():
 
 	# define plot data
 
-	y1_col_names = config['SeriesY1']
-
 	plt_domain = []
 
-	plt_ranges = []
-	for col in y1_col_names:
-		plt_ranges.append((col, []))
+	y1_series = config['SeriesY1']
+	plt_ranges_y1 = []
+	for series in y1_series:
+		plt_ranges_y1.append((series[0], [], series[1]))
+
+	y2_series = config['SeriesY2']
+	plt_ranges_y2 = []
+	for series in y2_series:
+		plt_ranges_y2.append((series[0], [], series[1]))
 
 	for row in rows:
 		plt_domain.append(row[col_map[date_col_name]])
 		
-		for i in range(len(y1_col_names)):
-			y1_series = y1_col_names[i]
-			name, series = plt_ranges[i] 
-			series.append(row[col_map[y1_series]])
+		for i in range(len(plt_ranges_y1)):
+			name, series, colour = plt_ranges_y1[i] 
+			series.append(row[col_map[name]])
+
+		for i in range(len(plt_ranges_y2)):
+			name, series, colour = plt_ranges_y2[i] 
+			series.append(row[col_map[name]])
 
 	# plot
 
@@ -207,6 +265,9 @@ def main():
 	out_file_name = title.replace(' ', '').replace('\n', '') + '.png'
 	out_file_path = output_path + out_file_name
 
-	line_plot_to_file(out_file_path, plt_domain, plt_ranges, title, config['XLabel'], config['YLabel'], major_grid = config["MajorGridLines"])
+	line_plot_to_file(out_file_path, 
+		plt_domain, plt_ranges_y1, plt_ranges_y2, 
+		title, config['XLabel'], config['Y1Label'], config['Y2Label'], 
+		major_grid = config["MajorGridLines"])
 
 main()

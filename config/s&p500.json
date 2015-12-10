@@ -1,0 +1,20 @@
+{
+	"SourcePath" : "/home/david/data/csv_data/equity_indices/^GSPC.csv",
+	
+	"DateColName" : "Date",
+	"TimeStampFormat" : "%Y-%m-%d",
+	"StartDate" : "2014-08-08", 
+	"EndDate" : "2015-11-30",
+
+	"SeriesY1" : [["High", "red"], ["Low", "green"]],
+	"SeriesY2" : [["Volume", "yellow"]],
+
+	"Title" : "S&P500 - High-Low, Volume vs Time",
+	"XLabel" : "Date",
+	"Y1Label" : "Price",
+	"Y2Label" : "Volume",
+
+	"MajorGridLines" : true,
+	
+	"OutputPath" : "/home/david/data/" 
+}
