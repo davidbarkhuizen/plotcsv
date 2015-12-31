@@ -1,0 +1,26 @@
+{
+	"SourcePath" : "/home/david/data/csv_data/credit/irate/USD/Federal_Funds_Rate_St_Louis_Fed.csv",
+	
+	"DateColName" : "DATE",
+	"TimeStampFormat" : "%Y-%m-%d",
+	
+	"StartDate" : "2006-01-01", 
+	"EndDate" : "2015-11-01",
+
+	"SeriesY1" : [["VALUE", "yellow"]],
+	"SeriesY2" : [],
+
+	"FontSizeLarge" : 20,
+
+	"Title" : "Federal Funds Rate : Jan 2006 - Nov 2015",
+	
+	"XLabel" : "Date",
+	"DateOutFormat" : "%Y-%m-%d",
+
+	"YAxis1" : ["FFR", 2],
+	"YAxis2" : ["Volume", 2],
+
+	"MajorGridLines" : true,
+	
+	"OutputPath" : "/home/david/data/" 
+}

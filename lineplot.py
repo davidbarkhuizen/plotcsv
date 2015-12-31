@@ -1,17 +1,34 @@
+import sys
+if (sys.version_info < (3, 0)): raise Exception("!python3")
+
+from time import perf_counter
+
 # TODO
-# - plot multiple series with shared x and y axes
-# -- colour each series diff
-# -- mark each series on legend
+# plot series from 2 diff CSV files, with common x date axis
+# allow mapping of series name
 
+# ---------------------------------------------------------
+# command line optionss
 
-from datetime import datetime
+import argparse
+
+def get_command_line_options():
+
+	parser = argparse.ArgumentParser(prog='plotcsv - plot csv time series with python & matplotlib')
+
+	parser.add_argument('--config_file_path', help='config file path', required=True)
+
+	values = parser.parse_args()
+
+	options = {}
+	options['config_file_path'] = values.config_file_path
+
+	return options
 
 # ---------------------------------------------------------
 # config
 
 import json
-
-CONFIG_FILE_PATH = 'config/s&p500.json'
 
 def load_config(path):
 
@@ -24,72 +41,9 @@ def load_config(path):
 	return j
 
 # ---------------------------------------------------------
-# csv data
+# CSV
 
-import csv
-import codecs
-
-def load_csv_rows(source_path, start_date, end_date, date_col_name, timestamp_format):
-
-	# log
-	# - actual data range
-	# - target range
-
-	rows = []
-
-	col_map = {}
-
-	# codec required under python3 in order to strip BOM
-	#
-	with codecs.open(source_path, 'r', "utf-8-sig") as csv_file:
-		
-		csv_file.seek(0)
-		reader = csv.reader(csv_file, delimiter = ',')
-
-		header_skipped = False
-		for row in reader:
-
-			# handle header row
-			#
-			if not header_skipped:
-
-				header_skipped = True
-				
-				col_count = len(row) 
-
-				for i in range(col_count):
-
-					col_name = row[i]
-					col_map[col_name] = i
-
-				continue
-			
-			timestamp = None
-			try:
-				timestamp = datetime.strptime(row[col_map[date_col_name]], timestamp_format)
-			except KeyError as ke:
-				print(col_map.keys())
-				raise
-
-			if start_date:
-				if (timestamp < start_date):
-					continue
-			if end_date:
-				if (timestamp > end_date):
-					break
-
-			row_data = []
-			for j in range(col_count):
-				value = row[j]
-				if j == col_map[date_col_name]:
-					value = datetime.strptime(value, timestamp_format)
-				else:
-					value = float(value)
-				row_data.append(value)
-
-			rows.append(row_data)
-			
-	return col_map, rows
+from loadcsv import load_csv_rows
 
 # ---------------------------------------------------------
 # plot
@@ -99,19 +53,23 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.ticker as mtick
 
+from datetime import datetime
+
 def line_plot_to_file(file_name, 
 	plt_domain, plt_ranges_y1, plt_ranges_y2, 
-	title, domain_label, range_label, range_2_label = 'UnNamed', 
-	fore_color='white', back_color='black', 
+	date_out_format,
+	title, domain_label, y_axis_1, y_axis_2,
+	font_size_large,
+	fore_color='white', back_color='black',  
 	major_grid = False):
 
 	# matplotlib.rc('axes',edgecolor='red', facecolor='purple')
 
+	ts_plot_start = perf_counter(); ts_plot_end = None;
+
 	fig = plt.figure()
 
 	lines_plots = []
-
-	xFormatter = mdates.DateFormatter('%y-%m-%d') # date_out_format
 
 	# Primary Y Axis ----------------------------------
 
@@ -132,18 +90,21 @@ def line_plot_to_file(file_name,
 	start_date = min(plt_domain)
 	end_date = max(plt_domain)
 
-	ax1.set_xlabel(domain_label, color=fore_color)  
-	
+	ax1.set_xlabel(domain_label, color=fore_color, fontsize=font_size_large)  
+
+	xFormatter = mdates.DateFormatter(date_out_format)
 	ax1.xaxis.set_major_formatter(xFormatter)
 	plt.xticks(color=fore_color, rotation=90)
 
-	ax1.set_ylabel(range_label, color=fore_color)
+	y_axis_1_label, y_axis_1_precision = y_axis_1 
+
+	ax1.set_ylabel(y_axis_1_label, color=fore_color, fontsize=font_size_large)
 	plt.yticks(color=fore_color)
 
 	ax1.tick_params(axis='x', colors=fore_color)
 	ax1.tick_params(axis='y', colors=fore_color)
 
-	# matplotlib.rc('axes', edgecolor='yellow')
+	ax1.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.' + str(y_axis_1_precision) + 'e'))
 
 	# Y Axis - 2
 
@@ -164,7 +125,9 @@ def line_plot_to_file(file_name,
 
 		ax2.ticklabel_format(axis='y', style='sci', color=fore_color)
 
-		ax2.set_ylabel(range_2_label, color=fore_color)  
+		y_axis_2_label, y_axis_2_precision = y_axis_2
+
+		ax2.set_ylabel(y_axis_2_label, color=fore_color, fontsize=font_size_large)  
 
 		# legend
 		#
@@ -176,7 +139,7 @@ def line_plot_to_file(file_name,
 			text.set_color(fore_color)
 
 		ax2.tick_params(axis='y', colors=fore_color, labelcolor=fore_color)
-		ax2.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.3e'))
+		ax2.yaxis.set_major_formatter(mtick.FormatStrFormatter('%.' + str(y_axis_2_precision) + 'e'))
 
 	# plot area edge
 	#
@@ -190,7 +153,7 @@ def line_plot_to_file(file_name,
 	
 	# common
 
-	plt.title(title, color=fore_color)
+	plt.title(title, color=fore_color, fontsize=font_size_large)
 
 	# ------------------------------------
 	# GRID LINES
@@ -198,43 +161,75 @@ def line_plot_to_file(file_name,
 	if major_grid:
 		ax1.grid(b=True, which='major', color='grey') # linestyle='-'
 
+	ts_plot_end = perf_counter();
+	print('plot fig', ts_plot_end - ts_plot_start)
+
+
 	# ------------------------------------
 	# SAVE TO FILE
 
+	ts_save_fig_start = perf_counter(); ts_save_fig_end = None;
+
 	fig.savefig(file_name, bbox_inches='tight', facecolor=back_color)
+
+	ts_save_fig_end = perf_counter();
+	print('save fig to file', ts_save_fig_end - ts_save_fig_start)
+
 
 # ---------------------------------------------------------
 # run
 
+DATE_FORMAT = '%Y-%m-%d'
+DATE_TIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+def parse_as_date_or_date_time(s):
+	
+	dt = None
+	try:
+		dt = datetime.strptime(s, DATE_TIME_FORMAT)
+	except Exception as e:
+		try:
+			dt = datetime.strptime(s, DATE_FORMAT)
+		except Exception as ee:
+			print(ee)
+			raise ee
+	finally:
+		if dt:
+			return dt
+		else:
+			raise Exception('date string "{0}" does not match either expected date "{1}" or datetime "{2}" formats'.format(s, DATE_FORMAT, DATE_TIME_FORMAT))
+
 def main():
 
-	# load config
+	# command line options
+	#
+	command_line_options = get_command_line_options()
+	config_file_path = command_line_options['config_file_path']
 
-	config = load_config(CONFIG_FILE_PATH)
+	# load config
+	config = load_config(config_file_path)
 
 	# data
-
 	date_col_name = config['DateColName']
 
-	# data filter
-
-	# '%Y-%m-%d'
-
-	start_date = datetime.strptime(config['StartDate'], '%Y-%m-%d') 
-	end_date = datetime.strptime(config['EndDate'], '%Y-%m-%d')
+	start_date = parse_as_date_or_date_time(config['StartDate']) 
+	end_date = parse_as_date_or_date_time(config['EndDate'])
 
 	# load & filter data
 
 	# ALSO GET actual start, end dates from load_csv_rows
+	#
 	time_stamp_format = config['TimeStampFormat']
 	col_map, rows = load_csv_rows(config['SourcePath'], start_date, end_date, date_col_name, time_stamp_format)
 
 	# plot labels
-
+	#
 	title = config['Title']
 
 	# define plot data
 
+	ts_construct_series_start = perf_counter(); ts_construct_series_end = None;
+	
 	plt_domain = []
 
 	y1_series = config['SeriesY1']
@@ -258,6 +253,9 @@ def main():
 			name, series, colour = plt_ranges_y2[i] 
 			series.append(row[col_map[name]])
 
+	ts_construct_series_end = perf_counter();
+	print('construct series', ts_construct_series_end - ts_construct_series_start)
+
 	# plot
 
 	output_path = config['OutputPath']
@@ -267,7 +265,9 @@ def main():
 
 	line_plot_to_file(out_file_path, 
 		plt_domain, plt_ranges_y1, plt_ranges_y2, 
-		title, config['XLabel'], config['Y1Label'], config['Y2Label'], 
+		config['DateOutFormat'],
+		title, config['XLabel'], config['YAxis1'], config['YAxis2'], 
+		config['FontSizeLarge'],
 		major_grid = config["MajorGridLines"])
 
 main()

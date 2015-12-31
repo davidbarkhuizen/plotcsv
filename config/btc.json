@@ -1,0 +1,20 @@
+{
+	"SourcePath" : "/home/david/data/csv_data/commodity/BTC/blockchain.info.market-price.csv",
+	
+	"DateColName" : "Date",
+	"TimeStampFormat" : "%d/%m/%Y %H:%M:%S",
+	"StartDate" : "2012-01-01", 
+	"EndDate" : "2012-07-01",
+
+	"SeriesY1" : [["Price", "yellow"]],
+	"SeriesY2" : [],
+
+	"Title" : "BTC Price - blockchain.info",
+	"XLabel" : "Date",
+	"YAxis1" : ["Price in USD/BTC", 1],
+	"YAxis2" : null,
+
+	"MajorGridLines" : true,
+	
+	"OutputPath" : "/home/david/data/" 
+}

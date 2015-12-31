@@ -1,16 +1,16 @@
 {
-	"SourcePath" : "/home/david/data/csv_data/equity_indices/^GSPC.csv",
+	"SourcePath" : "/home/david/data/csv_data/equity_indices/^HSI.csv",
 	
 	"DateColName" : "Date",
 	"TimeStampFormat" : "%Y-%m-%d",
 	
-	"StartDate" : "2015-01-01", 
-	"EndDate" : "2015-3-31",
+	"StartDate" : "2009-03-01", 
+	"EndDate" : "2015-12-12",
 
-	"SeriesY1" : [["High", "yellow"], ["Low", "yellow"]],
+	"SeriesY1" : [["Close", "yellow"]],
 	"SeriesY2" : [["Volume", "orange"]],
 
-	"Title" : "S&P500 Index",
+	"Title" : "Hang Seng Index",
 	
 	"XLabel" : "Date",
 	"DateOutFormat" : "%Y-%m-%d",
@@ -20,7 +20,5 @@
 
 	"MajorGridLines" : true,
 	
-	"FontSizeLarge" : 20,
-
 	"OutputPath" : "/home/david/data/" 
 }
