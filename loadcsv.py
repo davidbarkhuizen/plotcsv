@@ -50,9 +50,8 @@ def load_csv_rows(source_path, start_date, end_date, date_col_name, timestamp_fo
 			timestamp = None
 			try:
 				timestamp = datetime.strptime(row[col_map[date_col_name]], timestamp_format)
-			except KeyError as ke:
-				print(col_map.keys())
-				raise
+			except Exception as ke:
+				continue
 
 			if start_date:
 				if (timestamp < start_date):
@@ -67,7 +66,10 @@ def load_csv_rows(source_path, start_date, end_date, date_col_name, timestamp_fo
 				if j == col_map[date_col_name]:
 					value = datetime.strptime(value, timestamp_format)
 				else:
-					value = float(value)
+					try:
+						value = float(value)
+					except Exception as e:
+						continue
 				row_data.append(value)
 
 			rows.append(row_data)

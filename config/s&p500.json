@@ -4,8 +4,8 @@
 	"DateColName" : "Date",
 	"TimeStampFormat" : "%Y-%m-%d",
 	
-	"StartDate" : "2015-01-01", 
-	"EndDate" : "2015-3-31",
+	"StartDate" : "2008-01-01", 
+	"EndDate" : "2016-5-27",
 
 	"SeriesY1" : [["High", "yellow"], ["Low", "yellow"]],
 	"SeriesY2" : [["Volume", "orange"]],
