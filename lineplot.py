@@ -204,22 +204,28 @@ def main():
 	# command line options
 	#
 	command_line_options = get_command_line_options()
-	config_file_path = command_line_options['config_file_path']
 
 	# load config
+	#
+	config_file_path = command_line_options['config_file_path']
+	print('loading config file @ ' + config_file_path)
 	config = load_config(config_file_path)
 
 	# data
-	date_col_name = config['DateColName']
 
 	start_date = parse_as_date_or_date_time(config['StartDate']) 
 	end_date = parse_as_date_or_date_time(config['EndDate'])
+	print('analysis period: %s - %s' % (start_date, end_date))
 
 	# load & filter data
 
 	# ALSO GET actual start, end dates from load_csv_rows
 	#
+	date_col_name = config['DateColName']
 	time_stamp_format = config['TimeStampFormat']
+	print('timestamp column: %s, format: %s' % (date_col_name, time_stamp_format))
+	
+	print()
 	col_map, rows = load_csv_rows(config['SourcePath'], start_date, end_date, date_col_name, time_stamp_format)
 
 	# plot labels
@@ -234,24 +240,30 @@ def main():
 
 	y1_series = config['SeriesY1']
 	plt_ranges_y1 = []
-	for series in y1_series:
-		plt_ranges_y1.append((series[0], [], series[1]))
+	plt_range_y1_source_cols = []
+	for (source_label, colour, display_label) in y1_series:
+		plt_ranges_y1.append((display_label, [], colour))
+		plt_range_y1_source_cols.append(source_label)
 
 	y2_series = config['SeriesY2']
 	plt_ranges_y2 = []
-	for series in y2_series:
-		plt_ranges_y2.append((series[0], [], series[1]))
+	plt_range_y2_source_cols = []
+	for (source_label, colour, display_label) in y2_series:
+		plt_ranges_y2.append((display_label, [], colour))
+		plt_range_y2_source_cols.append(source_label)
 
 	for row in rows:
 		plt_domain.append(row[col_map[date_col_name]])
 		
 		for i in range(len(plt_ranges_y1)):
-			name, series, colour = plt_ranges_y1[i] 
-			series.append(row[col_map[name]])
+			name, series, colour = plt_ranges_y1[i]
+			source_name = plt_range_y1_source_cols[i]			
+			series.append(row[col_map[source_name]])
 
 		for i in range(len(plt_ranges_y2)):
-			name, series, colour = plt_ranges_y2[i] 
-			series.append(row[col_map[name]])
+			name, series, colour = plt_ranges_y2[i]
+			source_name = plt_range_y2_source_cols[i] 
+			series.append(row[col_map[source_name]])
 
 	ts_construct_series_end = perf_counter();
 	print('construct series', ts_construct_series_end - ts_construct_series_start)
@@ -263,7 +275,10 @@ def main():
 	out_file_name = title.replace(' ', '').replace('\n', '') + '.png'
 	out_file_path = output_path + out_file_name
 
-	line_plot_to_file(out_file_path, 
+	print('output file @ %s' % out_file_path)
+
+	line_plot_to_file(
+		out_file_path, 
 		plt_domain, plt_ranges_y1, plt_ranges_y2, 
 		config['DateOutFormat'],
 		title, config['XLabel'], config['YAxis1'], config['YAxis2'], 

@@ -4,11 +4,11 @@
 	"DateColName" : "Date",
 	"TimeStampFormat" : "%Y-%m-%d",
 	
-	"StartDate" : "2008-01-01", 
+	"StartDate" : "2012-01-01", 
 	"EndDate" : "2016-5-27",
 
-	"SeriesY1" : [["High", "yellow"], ["Low", "yellow"]],
-	"SeriesY2" : [["Volume", "orange"]],
+	"SeriesY1" : [["High", "yellow", "Hi"], ["Low", "blue", "Lo"]],
+	"SeriesY2" : [["Volume", "orange", "Vol"]],
 
 	"Title" : "S&P500 Index",
 	
